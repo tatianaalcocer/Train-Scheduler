@@ -1,0 +1,10 @@
+{
+	"trains": [
+		{
+			"name": "Runaway Train",
+			"dest": "Never comin' back",
+			"freq": 15,
+			"start": "12:00"
+		}
+	]
+}

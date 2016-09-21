@@ -15,30 +15,23 @@ $(document).ready(function(){
 //VARIABLES: ====================================================================================
 
 var database = firebase.database();
-
+var trains = [];
 
 
 
 //FUNCTIONS: ====================================================================================
  
-function calculateNextArrival() {
-	console.log("running calculateNextArrival")
-	//takes the input from the first train time and frequency to find 
-	//when the next train is compared to now and prints the time of day 
-	//the train will arrive
-
-	// Assigning the row and cells on the table
-	var table = document.getElementById("train-table");
-	var row = table.insertRow(1);
+function calculateNextArrival(startTime, frequency) {
 
 	// Grabbing the value of the text input
-	var time = moment($(".train-time").val().trim(), "HH:mm");
-	var freq = parseInt($(".train-freq").val().trim());
+	var time = moment(startTime, "HH:mm");
+	var freq = parseInt(frequency);
 
+	// Assigning time to new variable for while loop
 	var arrivalTime = moment(time);
 	var now = moment();
 
-
+	// While the arrival time is before the current time, continue adding the value of frequency (mins)
 	while(arrivalTime.isBefore(now)) {
 		arrivalTime.add(freq, 'm');
 	}
@@ -47,50 +40,75 @@ function calculateNextArrival() {
 }
 
 
-function calculateMinutes() {
-	console.log("running calculateMinutes")
-	//takes the input from first train time and frequency to find when the next train is,
-	//compared to now, and returns remaining mins rounded up, using floating point number
-
-	// Grabbing the value of the text input
-	var time = moment($(".train-time").val().trim(), "HH:mm");
-	var freq = $(".train-freq").val().trim();
-
-	return Math.ceil(calculateNextArrival().diff( moment(), 'm', true));
+function calculateMinutes(startTime, frequency) {
+	
+	// Returning the difference between the current time and the time of the next arrival
+	return Math.ceil(calculateNextArrival(startTime, frequency).diff( moment(), 'm', true));
 
 }
 
 
 function clearFields() {
-	console.log("running clearFields");
+
+	// Clears the text input fields
 	$(".train-input").val("");
 }
 
+function updateTable(trains) {
 
-function addTrain() {
-	console.log("running add train");
+	document.getElementById('train-table-body').innerHTML = '';
 
-	// Assigning the row and cells on the table
-	var table = document.getElementById("train-table");
-	var row = table.insertRow(1);
+	for(var i in trains) {
+		// Assigning the row and cells on the table
+		var table = document.getElementById("train-table-body");
+		var row = table.insertRow();
 
-	var nameCell    = row.insertCell(0);
-	var destCell    = row.insertCell(1);
-	var freqCell    = row.insertCell(2);
-	var arrivalCell = row.insertCell(3);
-	var minutesCell = row.insertCell(4);
+		var nameCell    = row.insertCell(0);
+		var destCell    = row.insertCell(1);
+		var freqCell    = row.insertCell(2);
+		var arrivalCell = row.insertCell(3);
+		var minutesCell = row.insertCell(4);
+
+
+		// Displaying the value of the text input onto the table
+		nameCell.innerHTML = trains[i].name;
+		destCell.innerHTML = trains[i].dest;
+		freqCell.innerHTML = trains[i].freq;
+		arrivalCell.innerHTML = calculateNextArrival(trains[i].start, trains[i].freq).format('HH:mm');
+		minutesCell.innerHTML = calculateMinutes(trains[i].start, trains[i].freq);
+
+
+	}
+}
+
+function addTrain(train) {
 
 	// Grabbing the value of the text input
-	name = $(".train-name").val().trim();
-	dest = $(".train-dest").val().trim();
-	freq = $(".train-freq").val().trim();
+	name = train.name;
+	dest = train.dest;
+	freq = train.freq;
+	start = train.start;
 
-	// Displaying the value of the text input onto the table
-	nameCell.innerHTML = name;
-	destCell.innerHTML = dest;
-	freqCell.innerHTML = freq;
-	arrivalCell.innerHTML = calculateNextArrival().format('HH:mm');
-	minutesCell.innerHTML = calculateMinutes();
+	// Pusing train information
+	trains.push({
+        name: name,
+        dest: dest,
+        freq: freq,
+        start: start
+    });
+
+	// Setting the value of the database to be equal to the local array
+	database.ref('trains').set(trains);
+}
+
+function onTrainSubmit() {
+
+	addTrain({
+		name: $(".train-name").val().trim(),
+		dest: $(".train-dest").val().trim(),
+		freq: $(".train-freq").val().trim(),
+		start: $(".train-time").val().trim()
+	});
 
 	// Clearing the text input boxes
 	clearFields();
@@ -98,9 +116,15 @@ function addTrain() {
 
 
 // EVENT LISTENERS: =============================================================================
-$(".add-train").on("click", addTrain);
+$(".add-train").on("click", onTrainSubmit);
 
 
+database.ref('trains').on('value', function(snapshot) {
+    var dbTrains = snapshot.val();
+    trains = dbTrains;
+   
+    updateTable(trains);
+});
 
 
 

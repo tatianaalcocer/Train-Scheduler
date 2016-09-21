@@ -29,6 +29,10 @@
 
 	<script src="assets/javascript/app.js"></script>
 
+	<!-- BOOTSWATCH -->
+
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootswatch/3.3.7/journal/bootstrap.min.css">
+
 </head>
 
 <div class="jumbotron">
@@ -52,13 +56,16 @@
 
 			  <!-- Table -->
 			  <table class="table" id="train-table">
-			  	<tr>
-			  		<th>Train Name: </th>
-			  		<th>Destination: </th>
-			  		<th>Frequency (mins): </th>
-			  		<th>Next Arrival: </th>
-			  		<th>Minutes Away: </th>
-			  	</tr>
+			  	<thead class="train-header">
+				  	<tr>
+				  		<th>Train Name: </th>
+				  		<th>Destination: </th>
+				  		<th>Frequency (mins): </th>
+				  		<th>Next Arrival: </th>
+				  		<th>Minutes Away: </th>
+				  	</tr>
+				</thead>
+				<tbody id="train-table-body"></tbody>
 			  </table>
 			</div>
 
@@ -96,7 +103,7 @@
 				    <input type="text" class="form-control train-freq train-input" id="searchTerm">
 				</div>
 
-				<button type="submit" class="btn btn-default add-train">Add Train</button>
+				<button type="submit" class="btn btn-info add-train">Add Train</button>
 
 			</div> <!-- END OF PANEL -->
 		</div> <!-- END OF TRAIN INPUT -->
